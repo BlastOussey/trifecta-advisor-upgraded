@@ -60,3 +60,36 @@ if (contact) {
     window.location.href = `mailto:glen@trifectaadvisor.co?subject=${subject}&body=${body}`;
   });
 }
+
+// Welcome pop-up: shows once per visit, a moment after the page loads
+(function () {
+  const FORM = "https://docs.google.com/forms/d/1lLvw_jfb3Lylcxi_b9yChQI-BmFZvieyubU8OPuXAUA/edit";
+  let seen = false;
+  try { seen = sessionStorage.getItem("trifectaPopupSeen") === "1"; } catch (e) {}
+  if (seen) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "popup-overlay";
+  overlay.innerHTML = `
+    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+      <button class="popup-close" aria-label="Close">&times;</button>
+      <span class="eyebrow">Start here</span>
+      <h2 id="popup-title">Not sure where to begin?</h2>
+      <p>Take the free assessment &mdash; two minutes, no cost &mdash; and see which program fits where you are right now.</p>
+      <a class="btn btn-gold" href="${FORM}" target="_blank" rel="noopener">Take the free assessment</a>
+      <a class="btn btn-outline" href="/contact">Or book a session with Glen</a>
+      <small>No cost. No obligation.</small>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  function close() {
+    overlay.classList.remove("show");
+    try { sessionStorage.setItem("trifectaPopupSeen", "1"); } catch (e) {}
+  }
+  overlay.querySelector(".popup-close").addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelectorAll(".popup .btn").forEach((b) => b.addEventListener("click", close));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+
+  setTimeout(() => overlay.classList.add("show"), 1500);
+})();
